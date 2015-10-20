@@ -317,11 +317,91 @@ let Store = ngReflux.createStore({
 [Back to top](#content)
 
 ## Using ngReflux in an Angular App
-TODO
-### Creating Stores as Services
-TODO
+You can use ngReflux service in any Angular *Directive*, *Controller* or even *Service* simply by injecting it via Angular's DI mechanism. However, in preparing
+for the coming of Angular 2 and it's use of "Components", I typically structure my views using only *Directives* with embedded *Controllers*, which is how Angular 2
+Components will end up functioning.  In this way, I can make up a view using just *Directives*, and inject my Stores and Actions into the controller to manage state.
+
+The goal of Flux style architectures is to keep state management in one place.  *State*, here, typically refers to application state or data models that provide state
+to multiple components in a view.  If a *Directive* has nested *Directives*, you can pass state to the child directives via properties, much like React/Flux does; and
+still use Actions to trigger changes in Stores.  The parent Component will receive updates from the Stores they listen to and pass the new state down to child Directives
+via properties - allowing us to take advantage of Angular's binding mechanism.
+
+```
+╔═════════╗       ╔════════╗ (state)   ╔═════════════════╗
+║ Actions ║──────>║ Stores ║──────────>║ View Components ║
+╚═════════╝       ╚════════╝           ╚═════════════════╝
+     ^                                      │  │   │
+     └──────────────────┰───────────────────┘  │   └───────────┐ (prop=state)
+                        │                      v               v
+                        │       ╔═════════════════╗   ╔═════════════════╗
+                        └───────║ Child Component ║   ║ Child Component ║
+                                ╚═════════════════╝   ╚═════════════════╝
+```
+
+An Angular view can be made up of multiple such components.  Components can use a single Store for managing application state, or use multiple Stores. ngReflux is flexible
+in how you pair up components to Stores and Actions.
+
 ### Creating Actions as Services
-TODO
+Actions are created as Services to be included by the Stores and Components that need to listen to them or trigger them.
+
+```javascript
+angular.app('app').factory('TodoActions', TodoActions);
+
+TodoActions.$inject = ['ngReflux'];
+function TodoActions(ngReflux) {
+    let actions =   ngReflux.createActions([
+        'addTodo',
+        'removeTodo',
+        'toggleTodo'
+    ]);
+    return actions;
+}
+
+```
+We use the `ngReflux#createActions` method to create multiple actions at once. We create an Action for all the possible behavior we
+want to provide to our components. Actions, in this way, serve as a kind of API between Components and Stores.  All the Actions are
+for changing state in the Store.  As we'll see, the Components actually get their data (*read only*) from the Store directly.
+
+### Creating Stores as Services
+Stores are created as Services to be included by the Components that want to listen on them for data and changes.
+
+```javascript
+angular.app('app').factory('TodoStore', TodoStore);
+
+TodoStore.$inject = ['ngReflux', 'TodoActions'];
+function TodoStore(ngReflux, TodoActions) {
+    return ngReflux.createStore({
+        listenables: [ TodoActions ],
+        init() { 
+            this.lastid = 0;
+            this.todos = [];
+        },
+        onAddTodo(description) {
+            this.todos.push({
+                id: this.lastid += 1,
+                description: description,
+                added: (new Date()).getTime(),
+                done: false
+            });
+        },
+        onRemoveTodo(id) {
+            this.todos = this.todos.filter((t) => t.id != id);
+        },
+        onToggleTodo(id) {
+            this.todos = this.todos.map((todo) => {
+                todo.done = todo.id == id ? !todo.done : todo.done;
+                return todo;
+            });
+        },
+        getTodos() {
+            return this.todos;
+        }
+    });
+}
+```
+Here, the Store provides handlers for all the Actions in `TodoActions` that it is listening to and it provides a `getTodos()` method that stores
+can use to request the list of todos at any time.
+
 ### Using Actions and Stores in Components
 TODO
 
