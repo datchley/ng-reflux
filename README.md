@@ -399,11 +399,79 @@ function TodoStore(ngReflux, TodoActions) {
     });
 }
 ```
-Here, the Store provides handlers for all the Actions in `TodoActions` that it is listening to and it provides a `getTodos()` method that stores
+Here, the Store provides handlers for all the Actions in `TodoActions` that it is listening to and it provides a `getTodos()` method that view components
 can use to request the list of todos at any time.
 
 ### Using Actions and Stores in Components
-TODO
+Now, let's make a `todo-list` Directive, in component style, that takes advantage of our TodoStore and TodoActions. The component will simply initialize its
+state, the list of todos, listen for any changes on the store, and request changes through Actions.
+
+```javascript
+angular.module('app').directive('todoList', todoList);
+
+function todoList() {
+    return {
+        scope: {},
+        restrict: 'AE',
+        controllerAs: 'todoList',
+        bindToController: true,
+        controller: ['TodoStore', 'TodoActions', TodoListController],
+        templateUrl: 'todo-list.html'
+    };            
+}
+
+class TodoListController {
+    constructor(TodoStore, TodoActions) {
+        this.actions = TodoActions;
+        this.store = TodoStore;
+        this.todos = this.store.getTodos();
+
+        this.columns = ['Id','Description','Added','Done?', 'Actions'];
+
+        // Listen for changes in state on our Store, update our todos
+        this.store.listen((state) => {
+            $scope.$applyAsync(() => {  // hack when using controllerAs
+                this.todos = this.store.getState();
+            });        
+        });
+    }
+
+    addTodo(description) {
+        this.actions.addTodo(description);
+    }
+
+    removeTodo(id) {
+        this.actions.removeTodo(id);
+    }
+
+    toggleTodo(id) {
+        this.actions.toggleTodo(id);
+    }
+}
+```
+
+and our template
+```html
+<h1>Todo List</h1>
+<table>
+    <thead>
+        <tr><th ng-repeat="column in todoList.columns">{{column}}</th></tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="todo in todoList.todos">
+            <td>{{todo.id}}</td>
+            <td>{{todo.description}}</td>
+            <td>{{todo.added}}</td>
+            <td>
+                <input type="checkbox" ng-click="todoList.toggleTodo(todo.id)" ng-checked="todo.done" />
+            </td>
+            <td>
+                <a ng-click="todoList.removeTodo(todo.id)">&times;</a>
+            </td>
+        </tr>
+    </tbody>
+</table>
+```
 
 ## Advanced Concepts
 TODO
