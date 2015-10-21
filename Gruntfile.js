@@ -34,7 +34,7 @@ module.exports = function (grunt) {
                     ]
                 },
                 files: {
-                    "./dist/immutable-state-mixin.js": ["./src/state-mixin.js"]
+                    "./dist/immutable-state-mixin.js": ["./src/immutable-state-mixin.js"]
                 }
             }
         },
@@ -68,5 +68,5 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-contrib-uglify");
     grunt.loadNpmTasks("grunt-contrib-jshint");
 
-    grunt.registerTask("default", ["jshint","browserify","uglify"]);
+    grunt.registerTask("default", ["jshint", "browserify", "uglify"]);
 };

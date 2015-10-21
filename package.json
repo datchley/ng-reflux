@@ -6,8 +6,12 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "main": "dist/reflux-angular.js",
-  "author": "David Atchley <david.m.atchley@gmail.com>",
+  "author": "David Atchley <david.m.atchley@gmail.com> (http://datchley.name)",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/datchley/ng-reflux.git"
+  },
   "browserify": {
     "transform": [
       "browserify-shim",
