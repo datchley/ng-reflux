@@ -6,11 +6,12 @@ module.exports = function (grunt) {
                 options: {
                     browserifyOptions: {
                         // debug: true,
-                        standalone: 'ng-reflux'
+                        standalone: 'ng-reflux',
+                        paths: [ "src" ]
                     },
                     transform: [
                         "browserify-shim",
-                        ["babelify", { loose: "all" }]
+                        ["babelify", { ignore: "node_modules", loose: "all" }]
                     ]
                 },
                 files: {

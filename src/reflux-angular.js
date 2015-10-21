@@ -1,5 +1,5 @@
 import angular from 'angular';
-import util from './util';
+import util from 'util.js';
 
 
 export default angular.module('ng.reflux', [])

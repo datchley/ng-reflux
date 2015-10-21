@@ -12,9 +12,9 @@ var _angular = typeof window !== "undefined" ? window['angular'] : typeof global
 
 var _angular2 = _interopRequireDefault(_angular);
 
-var _util = require('./util');
+var _utilJs = require('util.js');
 
-var _util2 = _interopRequireDefault(_util);
+var _utilJs2 = _interopRequireDefault(_utilJs);
 
 exports['default'] = _angular2['default'].module('ng.reflux', []).factory('EventEmitter', EventEmitterService).factory('ngReflux', ngReflux);
 
@@ -172,12 +172,12 @@ function ngReflux(EventEmitter) {
     * @returns {Object} - an object, whereby each proptery is an action that can be triggered.
     */
     Reflux.createActions = function (actions) {
-        if (_util2['default'].isArray(actions)) {
+        if (_utilJs2['default'].isArray(actions)) {
             return actions.reduce(function (obj, name) {
                 obj[name] = Reflux.createAction();
                 return obj;
             }, {});
-        } else if (_util2['default'].isObject(actions)) {
+        } else if (_utilJs2['default'].isObject(actions)) {
             return Object.keys(actions).reduce(function (obj, name) {
                 obj[name] = Reflux.createAction(actions[name]);
                 return obj;
@@ -204,29 +204,29 @@ function ngReflux(EventEmitter) {
 
             // Apply any mixins, allow for multiple, sequenced init() methods
             this.initQueue = [];
-            if (this.mixins && _util2['default'].isArray(this.mixins) && this.mixins.length) {
+            if (this.mixins && _utilJs2['default'].isArray(this.mixins) && this.mixins.length) {
                 this.mixins.forEach(function (mixin) {
-                    if (mixin.init && _util2['default'].isFunction(mixin.init)) {
+                    if (mixin.init && _utilJs2['default'].isFunction(mixin.init)) {
                         self.initQueue.push(mixin.init);
                         delete mixin.init;
                     }
-                    _util2['default'].assign(self, mixin);
+                    _utilJs2['default'].assign(self, mixin);
                 });
             }
 
             // Automatically attach actions if .listenables specified
             if (this.listenables) {
-                if (_util2['default'].isArray(this.listenables) && this.listenables.length) {
+                if (_utilJs2['default'].isArray(this.listenables) && this.listenables.length) {
                     this.listenables.forEach(function (action) {
-                        self[_util2['default'].isObject(action) ? 'listenToMany' : 'listenTo'](action);
+                        self[_utilJs2['default'].isObject(action) ? 'listenToMany' : 'listenTo'](action);
                     });
-                } else if (_util2['default'].isObject(this.listenables)) {
+                } else if (_utilJs2['default'].isObject(this.listenables)) {
                     this.listenToMany(this.listenables);
                 }
             }
 
             // Run any startup code if specified
-            if (this.init && _util2['default'].isFunction(this.init)) {
+            if (this.init && _utilJs2['default'].isFunction(this.init)) {
                 if (this.initQueue.length) {
                     this.initQueue.forEach(function (initFn) {
                         initFn.apply(self);
@@ -237,7 +237,7 @@ function ngReflux(EventEmitter) {
         }
 
         // Extend our prototype with the passed in Store definiton
-        _util2['default'].assign(Store.prototype, definition);
+        _utilJs2['default'].assign(Store.prototype, definition);
 
         /**
         * Listen to an observable, providing a callback to invoke when the 
@@ -249,10 +249,10 @@ function ngReflux(EventEmitter) {
         */
         Store.prototype.listenTo = function (listenable, callback) {
             var handler;
-            if (!_util2['default'].isFunction(listenable.listen)) {
+            if (!_utilJs2['default'].isFunction(listenable.listen)) {
                 throw new TypeError(listenable + " is missing a listen method");
             }
-            if (_util2['default'].isString(callback)) {
+            if (_utilJs2['default'].isString(callback)) {
                 handler = this[callback] || this[ucfirst(callback)] || this['on' + ucfirst(callback)];
             } else {
                 handler = callback;
@@ -317,7 +317,7 @@ function ngReflux(EventEmitter) {
 module.exports = exports['default'];
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./util":2}],2:[function(require,module,exports){
+},{"util.js":2}],2:[function(require,module,exports){
 /** 
  * @file util.js 
  * @description Simple utility module for common functions and type checks
