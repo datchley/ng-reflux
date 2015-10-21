@@ -1,5 +1,6 @@
 import angular from 'angular';
-import util from 'util.js';
+// import t from './util.js';
+var t = require('./util.js');
 
 
 export default angular.module('ng.reflux', [])
@@ -164,13 +165,13 @@ function ngReflux(EventEmitter) {
     * @returns {Object} - an object, whereby each proptery is an action that can be triggered.
     */
     Reflux.createActions = function(actions) {
-        if (util.isArray(actions)) {
+        if (t.isArray(actions)) {
             return actions.reduce(function(obj, name) {
                 obj[name] = Reflux.createAction();
                 return obj;
             }, {});
         }
-        else if (util.isObject(actions)) {
+        else if (t.isObject(actions)) {
             return Object.keys(actions).reduce(function(obj, name) {
                 obj[name] = Reflux.createAction(actions[name]);
                 return obj;
@@ -195,30 +196,30 @@ function ngReflux(EventEmitter) {
             
             // Apply any mixins, allow for multiple, sequenced init() methods
             this.initQueue = [];
-            if (this.mixins && util.isArray(this.mixins) && this.mixins.length) {
+            if (this.mixins && t.isArray(this.mixins) && this.mixins.length) {
                 this.mixins.forEach(function(mixin) {
-                    if (mixin.init && util.isFunction(mixin.init)) {
+                    if (mixin.init && t.isFunction(mixin.init)) {
                         self.initQueue.push(mixin.init);
                         delete mixin.init;
                     }
-                    util.assign(self, mixin);
+                    t.assign(self, mixin);
                 });
             }
             
             // Automatically attach actions if .listenables specified
             if (this.listenables) {
-                if (util.isArray(this.listenables) && this.listenables.length) {
+                if (t.isArray(this.listenables) && this.listenables.length) {
                     this.listenables.forEach(function(action) {
-                        self[util.isObject(action) ? 'listenToMany' : 'listenTo'](action);
+                        self[t.isObject(action) ? 'listenToMany' : 'listenTo'](action);
                     });
                 }
-                else if (util.isObject(this.listenables)) {
+                else if (t.isObject(this.listenables)) {
                     this.listenToMany(this.listenables);
                 }
             }
             
             // Run any startup code if specified
-            if (this.init && util.isFunction(this.init)) {
+            if (this.init && t.isFunction(this.init)) {
                 if (this.initQueue.length) {
                     this.initQueue.forEach(function(initFn) {
                         initFn.apply(self);
@@ -229,7 +230,7 @@ function ngReflux(EventEmitter) {
         }
 
         // Extend our prototype with the passed in Store definiton
-        util.assign(Store.prototype, definition);
+        t.assign(Store.prototype, definition);
         
         /**
         * Listen to an observable, providing a callback to invoke when the 
@@ -241,10 +242,10 @@ function ngReflux(EventEmitter) {
         */
         Store.prototype.listenTo = function (listenable, callback) {
             var handler;
-            if (!util.isFunction(listenable.listen)) {
+            if (!t.isFunction(listenable.listen)) {
                 throw new TypeError(listenable + " is missing a listen method");
             }
-            if (util.isString(callback)) {
+            if (t.isString(callback)) {
                 handler = this[callback] || this[ucfirst(callback)] || this['on' + ucfirst(callback)];
             }
             else {

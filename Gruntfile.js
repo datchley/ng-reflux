@@ -12,6 +12,9 @@ module.exports = function (grunt) {
                     transform: [
                         "browserify-shim",
                         ["babelify", { ignore: "node_modules", loose: "all" }]
+                    ],
+                    plugin: [
+                        [ "browserify-derequire" ]
                     ]
                 },
                 files: {

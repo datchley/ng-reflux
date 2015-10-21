@@ -1,4 +1,4 @@
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.ngReflux = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.ngReflux = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -12,9 +12,8 @@ var _angular = typeof window !== "undefined" ? window['angular'] : typeof global
 
 var _angular2 = _interopRequireDefault(_angular);
 
-var _utilJs = require('util.js');
-
-var _utilJs2 = _interopRequireDefault(_utilJs);
+// import t from './util.js';
+var t = _dereq_('./util.js');
 
 exports['default'] = _angular2['default'].module('ng.reflux', []).factory('EventEmitter', EventEmitterService).factory('ngReflux', ngReflux);
 
@@ -172,12 +171,12 @@ function ngReflux(EventEmitter) {
     * @returns {Object} - an object, whereby each proptery is an action that can be triggered.
     */
     Reflux.createActions = function (actions) {
-        if (_utilJs2['default'].isArray(actions)) {
+        if (t.isArray(actions)) {
             return actions.reduce(function (obj, name) {
                 obj[name] = Reflux.createAction();
                 return obj;
             }, {});
-        } else if (_utilJs2['default'].isObject(actions)) {
+        } else if (t.isObject(actions)) {
             return Object.keys(actions).reduce(function (obj, name) {
                 obj[name] = Reflux.createAction(actions[name]);
                 return obj;
@@ -204,29 +203,29 @@ function ngReflux(EventEmitter) {
 
             // Apply any mixins, allow for multiple, sequenced init() methods
             this.initQueue = [];
-            if (this.mixins && _utilJs2['default'].isArray(this.mixins) && this.mixins.length) {
+            if (this.mixins && t.isArray(this.mixins) && this.mixins.length) {
                 this.mixins.forEach(function (mixin) {
-                    if (mixin.init && _utilJs2['default'].isFunction(mixin.init)) {
+                    if (mixin.init && t.isFunction(mixin.init)) {
                         self.initQueue.push(mixin.init);
                         delete mixin.init;
                     }
-                    _utilJs2['default'].assign(self, mixin);
+                    t.assign(self, mixin);
                 });
             }
 
             // Automatically attach actions if .listenables specified
             if (this.listenables) {
-                if (_utilJs2['default'].isArray(this.listenables) && this.listenables.length) {
+                if (t.isArray(this.listenables) && this.listenables.length) {
                     this.listenables.forEach(function (action) {
-                        self[_utilJs2['default'].isObject(action) ? 'listenToMany' : 'listenTo'](action);
+                        self[t.isObject(action) ? 'listenToMany' : 'listenTo'](action);
                     });
-                } else if (_utilJs2['default'].isObject(this.listenables)) {
+                } else if (t.isObject(this.listenables)) {
                     this.listenToMany(this.listenables);
                 }
             }
 
             // Run any startup code if specified
-            if (this.init && _utilJs2['default'].isFunction(this.init)) {
+            if (this.init && t.isFunction(this.init)) {
                 if (this.initQueue.length) {
                     this.initQueue.forEach(function (initFn) {
                         initFn.apply(self);
@@ -237,7 +236,7 @@ function ngReflux(EventEmitter) {
         }
 
         // Extend our prototype with the passed in Store definiton
-        _utilJs2['default'].assign(Store.prototype, definition);
+        t.assign(Store.prototype, definition);
 
         /**
         * Listen to an observable, providing a callback to invoke when the 
@@ -249,10 +248,10 @@ function ngReflux(EventEmitter) {
         */
         Store.prototype.listenTo = function (listenable, callback) {
             var handler;
-            if (!_utilJs2['default'].isFunction(listenable.listen)) {
+            if (!t.isFunction(listenable.listen)) {
                 throw new TypeError(listenable + " is missing a listen method");
             }
-            if (_utilJs2['default'].isString(callback)) {
+            if (t.isString(callback)) {
                 handler = this[callback] || this[ucfirst(callback)] || this['on' + ucfirst(callback)];
             } else {
                 handler = callback;
@@ -317,7 +316,7 @@ function ngReflux(EventEmitter) {
 module.exports = exports['default'];
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"util.js":2}],2:[function(require,module,exports){
+},{"./util.js":2}],2:[function(_dereq_,module,exports){
 /** 
  * @file util.js 
  * @description Simple utility module for common functions and type checks
