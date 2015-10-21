@@ -1,5 +1,5 @@
 import angular from 'angular';
-import t from './util.js';
+import util from './util.js';
 
 
 export default angular.module('ng.reflux', [])
@@ -7,81 +7,79 @@ export default angular.module('ng.reflux', [])
     .factory('ngReflux', ngReflux);
 
 /**
-* @namespace Service
-* Simple EventEmitter Service Implementation which provides for creating an
-* object that can add listeners and remove listeners, as well as 
-* emit events to all current listeners.
-* You can 
-*/
+ * @namespace Service
+ * Simple EventEmitter Service Implementation which provides for creating an
+ * object that can add listeners and remove listeners, as well as 
+ * emit events to all current listeners.
+ * You can 
+ */
 function EventEmitterService() {
-    function EventEmitter() {
-        this.listeners = {};
-    }
+    return class EventEmitter {
+        constructor() {
+            this.listeners = {};
+        }
 
-    /**
-    * Adds a listener to this object, registering the given callback
-    * for that listener. 
-    * @param label {String} - the channel name to listen to
-    * @param callback {Function} - the callback to trigger when an event
-    *      is emitted for that channel label
-    * @return undefined
-    */
-    EventEmitter.prototype.addListener = function (label, callback) {
-        this.listeners[label] = this.listeners[label] || [];
-        this.listeners[label].push(callback);
-    };
+        /**
+         * Adds a listener to this object, registering the given callback
+         * for that listener. 
+         * @param label {String} - the channel name to listen to
+         * @param callback {Function} - the callback to trigger when an event
+         *      is emitted for that channel label
+         * @returns undefined
+         */
+        addListener(label, callback) {
+            this.listeners[label] = this.listeners[label] || [];
+            this.listeners[label].push(callback);
+        }
 
-
-    /**
-    * Removes a listener for the given channel label that matches the
-    * given callback.
-    * @param label {String} - the channel name the  listener is on 
-    * @param callback {Function} - the callback the listener registered with for 
-    *      that label.
-    * @return {Boolean} - true if listener existed and was removed, false otherwise
-    */
-    EventEmitter.prototype.removeListener = function (label, callback) {
-        var fn = callback.toString(),
-            listeners = this.listeners[label],
-            index;
-        
-        if (listeners && listeners.length) {
-            index = listeners.reduce(function (i, listener, index) {
-                return (_.isFunction(listener) && listener.toString() == fn) ?
-                    i = index :
-                    i;
-            }, -1);
+        /**
+         * Removes a listener for the given channel label that matches the
+         * given callback.
+         * @param label {String} - the channel name the  listener is on 
+         * @param callback {Function} - the callback the listener registered with for 
+         *      that label.
+         * @returns {Boolean} - true if listener existed and was removed, false otherwise
+         */
+        removeListener(label, callback) {
+            let fn = callback.toString(),
+                listeners = this.listeners[label],
+                index;
             
-            if (index > -1) {
-                this.listeners[label] = listeners.splice(index, 1);
+            if (listeners && listeners.length) {
+                index = listeners.reduce((i, listener, index) => {
+                    return (util.isFunction(listener) && listener.toString() == fn) ?
+                        i = index :
+                        i;
+                }, -1);
+                
+                if (index > -1) {
+                    this.listeners[label] = listeners.splice(index, 1);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /**
+         * Emit an event, which is basicaly data, on a given channel label
+         * to all listeners on that channel.
+         * @param {String} label - the channel name to emit on
+         * @param {...args} - all remaining arguments are passed as arguments to each registered
+         *      callback for the listener.
+         * @returns {Boolean} - true if there are listeners on that label, false otherwise
+         */
+        emit(label, ...args) {
+            let listeners = this.listeners[label];
+            
+            if (listeners && listeners.length) {
+                listeners.forEach((listener) => {
+                    listener.apply(null, args); 
+                });
                 return true;
             }
+            return false;
         }
-        return false;
     };
-
-    /**
-    * Emit an event, which is basicaly data, on a given channel label
-    * to all listeners on that channel.
-    * @param {String} label - the channel name to emit on
-    * @param {...} - all remaining arguments are passed as arguments to each registered
-    *      callback for the listener.
-    * @return {Boolean} - true if there are listeners on that label, false otherwise
-    */
-    EventEmitter.prototype.emit = function(label /*, ... */) {
-        var args = [].slice.call(arguments, 1),
-            listeners = this.listeners[label];
-        
-        if (listeners && listeners.length) {
-            listeners.forEach(function(listener) {
-                listener.apply(null, args); 
-            });
-            return true;
-        }
-        return false;
-    };
-
-    return EventEmitter;
 }
 
 
@@ -164,13 +162,13 @@ function ngReflux(EventEmitter) {
     * @returns {Object} - an object, whereby each proptery is an action that can be triggered.
     */
     Reflux.createActions = function(actions) {
-        if (t.isArray(actions)) {
+        if (util.isArray(actions)) {
             return actions.reduce(function(obj, name) {
                 obj[name] = Reflux.createAction();
                 return obj;
             }, {});
         }
-        else if (t.isObject(actions)) {
+        else if (util.isObject(actions)) {
             return Object.keys(actions).reduce(function(obj, name) {
                 obj[name] = Reflux.createAction(actions[name]);
                 return obj;
@@ -195,30 +193,30 @@ function ngReflux(EventEmitter) {
             
             // Apply any mixins, allow for multiple, sequenced init() methods
             this.initQueue = [];
-            if (this.mixins && t.isArray(this.mixins) && this.mixins.length) {
+            if (this.mixins && util.isArray(this.mixins) && this.mixins.length) {
                 this.mixins.forEach(function(mixin) {
-                    if (mixin.init && t.isFunction(mixin.init)) {
+                    if (mixin.init && util.isFunction(mixin.init)) {
                         self.initQueue.push(mixin.init);
                         delete mixin.init;
                     }
-                    t.assign(self, mixin);
+                    util.assign(self, mixin);
                 });
             }
             
             // Automatically attach actions if .listenables specified
             if (this.listenables) {
-                if (t.isArray(this.listenables) && this.listenables.length) {
+                if (util.isArray(this.listenables) && this.listenables.length) {
                     this.listenables.forEach(function(action) {
-                        self[t.isObject(action) ? 'listenToMany' : 'listenTo'](action);
+                        self[util.isObject(action) ? 'listenToMany' : 'listenTo'](action);
                     });
                 }
-                else if (t.isObject(this.listenables)) {
+                else if (util.isObject(this.listenables)) {
                     this.listenToMany(this.listenables);
                 }
             }
             
             // Run any startup code if specified
-            if (this.init && t.isFunction(this.init)) {
+            if (this.init && util.isFunction(this.init)) {
                 if (this.initQueue.length) {
                     this.initQueue.forEach(function(initFn) {
                         initFn.apply(self);
@@ -229,7 +227,7 @@ function ngReflux(EventEmitter) {
         }
 
         // Extend our prototype with the passed in Store definiton
-        t.assign(Store.prototype, definition);
+        util.assign(Store.prototype, definition);
         
         /**
         * Listen to an observable, providing a callback to invoke when the 
@@ -241,10 +239,10 @@ function ngReflux(EventEmitter) {
         */
         Store.prototype.listenTo = function (listenable, callback) {
             var handler;
-            if (!t.isFunction(listenable.listen)) {
+            if (!util.isFunction(listenable.listen)) {
                 throw new TypeError(listenable + " is missing a listen method");
             }
-            if (t.isString(callback)) {
+            if (util.isString(callback)) {
                 handler = this[callback] || this[ucfirst(callback)] || this['on' + ucfirst(callback)];
             }
             else {
