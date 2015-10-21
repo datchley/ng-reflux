@@ -13,7 +13,7 @@ export default  {
     },
     getState(key) {
         let get = util.isArray(key) ? 'getIn' : 'get';
-        return key ?  this.state[get](key).toJS() : this.state.toJS();
+        return key ?  this.state[get](key) : this.state.toJS();
     },
     setState(next) {
         this.state = this.state.merge(next);  
