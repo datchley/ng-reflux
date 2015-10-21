@@ -5,29 +5,32 @@ module.exports = function (grunt) {
             dist: {
                 options: {
                     browserifyOptions: {
-                        debug: true,
-                        standalone: 'ng-reflux'
+                        debug: true
+                        // standalone: 'ng-reflux'
                     },
                     transform: [
                         "browserify-shim",
-                        ["babelify", { ignore: "node_modules", loose: "all" }]
+                        ["babelify", { loose: "all" }]
                     ],
                     plugin: [
                         [ "browserify-derequire" ]
                     ]
                 },
                 files: {
-                    "./dist/reflux-angular.js": ["./src/reflux-angular.js", "./src/util.js"]
+                    "./dist/reflux-angular.js": ["./src/reflux-angular.js"]
                 }
             },
             mixins: {
                 options: {
                     browserifyOptions: {
-                        debug: true,
-                        standalone: 'ImmutableStateMixin'
+                        debug: true
+                        // standalone: 'ImmutableStateMixin'
                     },
                     transform: [
                         ["babelify", { loose: "all" }]
+                    ],
+                    plugin: [
+                        [ "browserify-derequire" ]
                     ]
                 },
                 files: {
