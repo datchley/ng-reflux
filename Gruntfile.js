@@ -5,9 +5,8 @@ module.exports = function (grunt) {
             dist: {
                 options: {
                     browserifyOptions: {
-                        // debug: true,
-                        standalone: 'ng-reflux',
-                        paths: [ "src" ]
+                        debug: true,
+                        standalone: 'ng-reflux'
                     },
                     transform: [
                         "browserify-shim",
@@ -18,7 +17,7 @@ module.exports = function (grunt) {
                     ]
                 },
                 files: {
-                    "./dist/reflux-angular.js": ["./src/reflux-angular.js"]
+                    "./dist/reflux-angular.js": ["./src/reflux-angular.js", "./src/util.js"]
                 }
             },
             mixins: {
