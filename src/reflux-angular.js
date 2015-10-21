@@ -73,7 +73,7 @@ function EventEmitterService() {
             
             if (listeners && listeners.length) {
                 listeners.forEach((listener) => {
-                    listener.apply(null, args); 
+                    listener(...args); 
                 });
                 return true;
             }
@@ -84,21 +84,21 @@ function EventEmitterService() {
 
 
 /**
-* @namespace Service
-* The ngReflux service provides a slightly modified implementation of the
-* Reflux library by Mikael Brassman (https://github.com/spoike). It provides
-* an implementation of the Flux uni-directional data flow architecture that
-* can be used, in this case, in AngularJS implementations as a service.
-* This simplifies the Flux architecture by removing the Dispatcher and 
-* allowing actions to directly initiate new data to pass to stores which
-* are then listened to by View Components (directives/controllers).
-* 
-*    ╔═════════╗       ╔════════╗       ╔═════════════════╗
-*    ║ Actions ║──────>║ Stores ║──────>║ View Components ║
-*    ╚═════════╝       ╚════════╝       ╚═════════════════╝
-*         ^                                      │
-*         └──────────────────────────────────────┘
-*/
+ * @namespace Service
+ * The ngReflux service provides a slightly modified implementation of the
+ * Reflux library by Mikael Brassman (https://github.com/spoike). It provides
+ * an implementation of the Flux uni-directional data flow architecture that
+ * can be used, in this case, in AngularJS implementations as a service.
+ * This simplifies the Flux architecture by removing the Dispatcher and 
+ * allowing actions to directly initiate new data to pass to stores which
+ * are then listened to by View Components (directives/controllers).
+ * 
+ *    ╔═════════╗       ╔════════╗       ╔═════════════════╗
+ *    ║ Actions ║──────>║ Stores ║──────>║ View Components ║
+ *    ╚═════════╝       ╚════════╝       ╚═════════════════╝
+ *         ^                                      │
+ *         └──────────────────────────────────────┘
+ */
 ngReflux.$inject = ['EventEmitter'];
 function ngReflux(EventEmitter) {
 
