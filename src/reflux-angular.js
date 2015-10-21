@@ -1,5 +1,5 @@
 import angular from 'angular';
-import util from './util.js';
+import util from './util';
 
 
 export default angular.module('ng.reflux', [])
@@ -7,12 +7,12 @@ export default angular.module('ng.reflux', [])
     .factory('ngReflux', ngReflux);
 
 /**
-    * @namespace Service
-    * Simple EventEmitter Service Implementation which provides for creating an
-    * object that can add listeners and remove listeners, as well as 
-    * emit events to all current listeners.
-    * You can 
-    */
+* @namespace Service
+* Simple EventEmitter Service Implementation which provides for creating an
+* object that can add listeners and remove listeners, as well as 
+* emit events to all current listeners.
+* You can 
+*/
 function EventEmitterService() {
     function EventEmitter() {
         this.listeners = {};

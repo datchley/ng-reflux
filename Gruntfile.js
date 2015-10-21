@@ -5,7 +5,7 @@ module.exports = function (grunt) {
             dist: {
                 options: {
                     browserifyOptions: {
-                        debug: true,
+                        // debug: true,
                         standalone: 'ng-reflux'
                     },
                     transform: [

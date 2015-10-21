@@ -430,9 +430,7 @@ class TodoListController {
 
         // Listen for changes in state on our Store, update our todos
         this.store.listen((state) => {
-            $scope.$applyAsync(() => {  // hack when using controllerAs
-                this.todos = this.store.getState();
-            });        
+            this.todos = this.store.getState();
         });
     }
 
@@ -450,7 +448,13 @@ class TodoListController {
 }
 ```
 
-and our template
+Our Directive becomes much easier to implement now that we have a Store managing the state for us, and Actions to interact with that
+Store to request mutations.  Our controller methods are simply wrappers that call the appropriate Action to trigger the change in the
+Store.  To get our data, we simply grab the Todos when our Controller is instantiated and listen for any changes to that data coming
+from the Store.  Angular's binding takes care of the updating for us in the template.
+
+And here's our simple todo list template for this directive, `todo-list.html`
+
 ```html
 <h1>Todo List</h1>
 <table>
