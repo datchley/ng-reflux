@@ -90,6 +90,14 @@ The `ng.reflux` module provides an `ngReflux` service which has an API for creat
 
 **Note**: You can also inject the standalone `EventEmitter` service provided with `ng-reflux` as well if you need an EventEmitter.
 
+If you are debugging, there is a debug version with source maps available as well, which you can include by doing the following.
+
+```
+import "ng-reflux/dist/reflux-angular.js";
+```
+
+The default include for NPM is the minified, stripped version.
+
 [Back to top](#content)
 
 ### Actions

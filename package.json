@@ -5,7 +5,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "main": "dist/reflux-angular.js",
+  "main": "dist/reflux-angular.min.js",
   "author": "David Atchley <david.m.atchley@gmail.com> (http://datchley.name)",
   "license": "MIT",
   "repository": {
