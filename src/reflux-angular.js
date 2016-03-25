@@ -9,53 +9,54 @@ export default angular.module('ng.reflux', [])
 /**
 * @namespace Service
 * Simple EventEmitter Service Implementation which provides for creating an
-* object that can add listeners and remove listeners, as well as 
+* object that can add listeners and remove listeners, as well as
 * emit events to all current listeners.
-* You can 
+* You can
 */
 function EventEmitterService() {
     function EventEmitter() {
         this.listeners = {};
+        this.lastUid = -1;
     }
 
     /**
     * Adds a listener to this object, registering the given callback
-    * for that listener. 
+    * for that listener.
     * @param label {String} - the channel name to listen to
     * @param callback {Function} - the callback to trigger when an event
     *      is emitted for that channel label
     * @return undefined
     */
     EventEmitter.prototype.addListener = function (label, callback) {
-        this.listeners[label] = this.listeners[label] || [];
-        this.listeners[label].push(callback);
+        this.listeners[label] = this.listeners[label] || {};
+
+        // forcing token as String, to allow for future expansions without breaking usage
+		    // and allow for easy use as key names for the 'messages' object
+		    var token = 'uid_' + String(++this.lastUid);
+        this.listeners[label][token] = callback;
+
+        return token;
     };
 
 
     /**
     * Removes a listener for the given channel label that matches the
     * given callback.
-    * @param label {String} - the channel name the  listener is on 
-    * @param callback {Function} - the callback the listener registered with for 
+    * @param label {String} - the channel name the  listener is on
+    * @param callback {Function} - the callback the listener registered with for
     *      that label.
     * @return {Boolean} - true if listener existed and was removed, false otherwise
     */
-    EventEmitter.prototype.removeListener = function (label, callback) {
-        var fn = callback.toString(),
-            listeners = this.listeners[label],
-            index;
-        
-        if (listeners && listeners.length) {
-            index = listeners.reduce(function (i, listener, index) {
-                return (_.isFunction(listener) && listener.toString() == fn) ?
-                    i = index :
-                    i;
-            }, -1);
-            
-            if (index > -1) {
-                this.listeners[label] = listeners.splice(index, 1);
-                return true;
+    EventEmitter.prototype.removeListener = function (label, callback, token) {
+        var listeners = this.listeners[label];
+
+        if (listeners && token) {
+          for (var listener in listeners){
+            if(listeners.hasOwnProperty(listener) && listeners[token]) {
+              delete listeners[token];
+              return true;
             }
+          }
         }
         return false;
     };
@@ -71,12 +72,14 @@ function EventEmitterService() {
     EventEmitter.prototype.emit = function(label /*, ... */) {
         var args = [].slice.call(arguments, 1),
             listeners = this.listeners[label];
-        
-        if (listeners && listeners.length) {
-            listeners.forEach(function(listener) {
-                listener.apply(null, args); 
-            });
-            return true;
+
+        if (listeners) {
+          for (var listener in listeners){
+            if(listeners.hasOwnProperty(listener) && typeof listeners[listener] === 'function') {
+              listeners[listener].apply(null, args);
+            }
+          }
+          return true;
         }
         return false;
     };
@@ -91,10 +94,10 @@ function EventEmitterService() {
 * Reflux library by Mikael Brassman (https://github.com/spoike). It provides
 * an implementation of the Flux uni-directional data flow architecture that
 * can be used, in this case, in AngularJS implementations as a service.
-* This simplifies the Flux architecture by removing the Dispatcher and 
+* This simplifies the Flux architecture by removing the Dispatcher and
 * allowing actions to directly initiate new data to pass to stores which
 * are then listened to by View Components (directives/controllers).
-* 
+*
 *    ╔═════════╗       ╔════════╗       ╔═════════════════╗
 *    ║ Actions ║──────>║ Stores ║──────>║ View Components ║
 *    ╚═════════╝       ╚════════╝       ╚═════════════════╝
@@ -104,7 +107,7 @@ function EventEmitterService() {
 ngReflux.$inject = ['EventEmitter'];
 function ngReflux(EventEmitter) {
 
-    var Reflux = {};    
+    var Reflux = {};
 
     /**
     * Create an action that can be triggered. Actions are simply functions
@@ -113,14 +116,14 @@ function ngReflux(EventEmitter) {
     *
     * @param {Object} [optional] opts - any specific configuration for this action
     * @param {Boolean} opts.async - true if this action returns a promise, false if called synchronously
-    * @returns {Function} - the Action function 
+    * @returns {Function} - the Action function
     */
     Reflux.createAction = function (opts) {
         var action = new EventEmitter(),
             eventLabel = "action",
             functor;
 
-        // An Action - an action is just a function that is wired to 
+        // An Action - an action is just a function that is wired to
         // trigger itself.
         functor = function () {
             action.emit(eventLabel, [].slice.call(arguments, 0));
@@ -135,7 +138,7 @@ function ngReflux(EventEmitter) {
             functor.completed = Reflux.createAction();
             functor.failed = Reflux.createAction();
         }
-        
+
         /**
         * Subscribes the given callback for action triggered
         *
@@ -148,10 +151,10 @@ function ngReflux(EventEmitter) {
             var eventHandler = function (args) {
                 callback.apply(bindContext, args);
             };
-            action.addListener(eventLabel, eventHandler);
+            var token = action.addListener(eventLabel, eventHandler);
 
             return function () {
-                action.removeListener(eventLabel, eventHandler);
+                return action.removeListener(eventLabel, eventHandler, token);
             };
         };
 
@@ -192,7 +195,7 @@ function ngReflux(EventEmitter) {
 
         function Store() {
             var self = this;
-            
+
             // Apply any mixins, allow for multiple, sequenced init() methods
             this.initQueue = [];
             if (this.mixins && t.isArray(this.mixins) && this.mixins.length) {
@@ -204,7 +207,7 @@ function ngReflux(EventEmitter) {
                     t.assign(self, mixin);
                 });
             }
-            
+
             // Automatically attach actions if .listenables specified
             if (this.listenables) {
                 if (t.isArray(this.listenables) && this.listenables.length) {
@@ -216,7 +219,7 @@ function ngReflux(EventEmitter) {
                     this.listenToMany(this.listenables);
                 }
             }
-            
+
             // Run any startup code if specified
             if (this.init && t.isFunction(this.init)) {
                 if (this.initQueue.length) {
@@ -226,13 +229,16 @@ function ngReflux(EventEmitter) {
                 }
                 this.init();
             }
+
+            //
+            this.listeners = {};
         }
 
         // Extend our prototype with the passed in Store definiton
         t.assign(Store.prototype, definition);
-        
+
         /**
-        * Listen to an observable, providing a callback to invoke when the 
+        * Listen to an observable, providing a callback to invoke when the
         * observable emits an event.
         *
         * @param {Object} listenable - An object that is observable, implementing the EventEmitter interface
@@ -250,7 +256,7 @@ function ngReflux(EventEmitter) {
             else {
                 handler = callback;
             }
-            
+
             if (listenable.async) {
                 listenable.completed.listen(this['on'+ucfirst(callback)+'Completed'], this);
                 listenable.failed.listen(this['on'+ucfirst(callback)+'Failed'], this);
@@ -258,7 +264,7 @@ function ngReflux(EventEmitter) {
             }
             return listenable.listen(handler, this);
         };
-        
+
         /**
         * Short hand to listen to an Action object returned from ngReflux.createActions()
         * Calls .listenTo() on each action in the object
@@ -272,7 +278,7 @@ function ngReflux(EventEmitter) {
                 self.listenTo(actions[action], action);
             });
         };
-        
+
         /**
         * Listen to this Store, adding the given callback to its listeners
         * and optionally bind the callback to 'bindContext'
@@ -284,10 +290,10 @@ function ngReflux(EventEmitter) {
             var eventHandler = function (args) {
                 callback.apply(bindContext, args);
             };
-            store.addListener(eventLabel, eventHandler);
+            var token = store.addListener(eventLabel, eventHandler);
 
             return function () {
-                store.removeListener(eventLabel, eventHandler);
+                return store.removeListener(eventLabel, eventHandler, token);
             };
         };
 
@@ -307,4 +313,3 @@ function ngReflux(EventEmitter) {
 
     return Reflux;
 }
-
